@@ -35,3 +35,23 @@ Ajoutez les informations sensibles dans un fichier .env :
 ### 5️⃣ Lancer le bot en local
 - python bot.py
 
+# ☁️ Déploiement sur Railway
+### 1️⃣ Créer un compte sur Railway.app
+### 2️⃣ Créer un nouveau projet et ajouter PostgreSQL
+### 3️⃣ Déployer le projet à partir de GitHub
+### 4️⃣ Ajouter les variables d’environnement (DATABASE_URL, DISCORD_TOKEN, etc.)
+### 5️⃣ Railway démarre automatiquement votre bot 🎉
+
+# 📜 Exemples de Commandes
+## Commande                                          Description
+### /anniv add @User 10-02                  Ajoute l'anniversaire du membre
+### /anniv list                                             Affiche tous les anniversaires triés par date
+### /anniv for @User                               Affiche l'anniversaire d'un utilisateur
+### /anniv update @User 05-08          Met à jour l'anniversaire
+### /anniv delete @User                         Supprime un anniversaire
+
+# 🛠 Technologies Utilisées
+- Langage : Python 🐍
+- Frameworks : discord.py
+- Base de données : PostgreSQL 📊
+- Hébergement : Railway.app ☁️
