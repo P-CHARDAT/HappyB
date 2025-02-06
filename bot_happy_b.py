@@ -1,9 +1,10 @@
 import os
 import discord
 import asyncio
+import datetime
 from discord import app_commands
 from discord.ext import commands, tasks
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from dotenv import load_dotenv
 from database import add_birthday, get_all_birthdays, get_birthday, update_birthday, delete_birthday
 
@@ -119,14 +120,31 @@ class AnnivCommand(app_commands.Group):
             await interaction.response.send_message("📅 Aucun anniversaire enregistré.", ephemeral=True)
             return
         
-        # Sort the dictionary by upcoming birthday dates
-        sorted_anniversaires = dict(sorted(birthdays.items(), key=lambda item: datetime.strptime(item[1], "%d-%m")))
+        today = datetime.now().date()
+        sorted_birthdays = []
+        for user_id, date in birthdays:
+            day, month = map(int, date.split("-"))
+            
+            # Convert the birthday into a date object for this year
+            birthday_this_year = datetime(today.year, month, day).date()
 
-        msg = "**📅 Liste des anniversaires :**\n"
-        for user_id, date in sorted_anniversaires.items():
+            # If the birthday has already passed this year, set it to next year
+            if birthday_this_year < today:
+                birthday_this_year = datetime(today.year + 1, month, day).date()
+            
+            # Calculate the number of days until the next birthday
+            days_until = (birthday_this_year - today).days
+            
+            sorted_birthdays.append((user_id, date, days_until))
+
+        # Sort by the number of days until the birthday
+        sorted_birthdays.sort(key=lambda x: x[2])
+
+        msg = "**📅 Liste des anniversaires (triés par date la plus proche) :**\n"
+        for user_id, date, days_until in sorted_birthdays:
             user = interaction.guild.get_member(user_id)
             username = user.display_name if user else f"Utilisateur inconnu ({user_id})"
-            msg += f"🎂 {username} : {date}\n"
+            msg += f"🎂 {username} : {date} (**dans {days_until} jours**)\n"
 
         await interaction.response.send_message(msg)
 
