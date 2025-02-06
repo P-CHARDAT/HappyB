@@ -28,7 +28,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree  # Slash commands
 
 # Dictionary to store birthdays (in memory for now)
-anniversaires = {}
 reminded_users = set()  # Stores users who have already been reminded
 
 # -------------------------------
@@ -50,7 +49,7 @@ async def birthday_reminder():
     reminded_users = {"1_month": set(), "2_weeks": set()}  # Store users who have received reminders
 
 
-    for user_id, birthdate in anniversaires.items():
+    for user_id, birthdate in get_all_birthdays():
         birth_day, birth_month = map(int, birthdate.split("-"))
 
         # Convert birthday to this year
@@ -155,7 +154,7 @@ class AnnivCommand(app_commands.Group):
         """Affiche l'anniversaire d'un utilisateur spécifique"""
         date = get_birthday(user.id)
         if date:
-            await interaction.response.send_message(f"🎂 **{user.display_name}** a son anniversaire le **{anniversaires[user.id]}** !")
+            await interaction.response.send_message(f"🎂 **{user.display_name}** a son anniversaire le **{date}** !")
         else:
             await interaction.response.send_message(f"❌ Aucun anniversaire enregistré pour **{user.display_name}**.", ephemeral=True)
 
