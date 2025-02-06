@@ -14,6 +14,9 @@ BIRTHDAY_CHANNEL_ID = int(os.getenv("BIRTHDAY_CHANNEL_ID", 0))
 if TOKEN is None:
     raise ValueError("❌ Bot token not found! Make sure you have a valid DISCORD_TOKEN in your .env file.")
 
+if BIRTHDAY_CHANNEL_ID is None:
+    raise ValueError("❌ BIRTHDAY_CHANNEL_ID not found! Make sure to set BIRTHDAY_CHANNEL_ID as an environment variable.")
+
 # Bot setup
 intents = discord.Intents.default()
 intents.members = True
