@@ -5,6 +5,8 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from database import add_birthday, get_all_birthdays, get_birthday, update_birthday, delete_birthday
+
 
 # Load environment variables
 load_dotenv()
@@ -104,19 +106,21 @@ class AnnivCommand(app_commands.Group):
                 "❌ Format de date invalide. Utilisation correcte : `JJ-MM` (ex: 10-02)", ephemeral=True)
             return
 
-        anniversaires[user.id] = date
+        add_birthday(user.id, date)
         reminded_users.discard(user.id)  # Reset the reminder for this user
         await interaction.response.send_message(f"✅ Anniversaire de {user.mention} ajouté pour le {date} !")
+
 
     @app_commands.command(name="list", description="Affiche la liste des anniversaires enregistrés")
     async def list_birthdays(self, interaction: discord.Interaction):
         """Affiche la liste des anniversaires enregistrés"""
-        if not anniversaires:
+        birthdays = get_all_birthdays()
+        if not birthdays:
             await interaction.response.send_message("📅 Aucun anniversaire enregistré.", ephemeral=True)
             return
         
         # Sort the dictionary by upcoming birthday dates
-        sorted_anniversaires = dict(sorted(anniversaires.items(), key=lambda item: datetime.strptime(item[1], "%d-%m")))
+        sorted_anniversaires = dict(sorted(birthdays.items(), key=lambda item: datetime.strptime(item[1], "%d-%m")))
 
         msg = "**📅 Liste des anniversaires :**\n"
         for user_id, date in sorted_anniversaires.items():
@@ -126,14 +130,17 @@ class AnnivCommand(app_commands.Group):
 
         await interaction.response.send_message(msg)
 
+
     @app_commands.command(name="for", description="Affiche l'anniversaire d'un utilisateur")
     @app_commands.describe(user="Mentionnez l'utilisateur dont vous voulez voir l'anniversaire")
     async def birthday_for(self, interaction: discord.Interaction, user: discord.Member):
         """Affiche l'anniversaire d'un utilisateur spécifique"""
-        if user.id in anniversaires:
+        date = get_birthday(user.id)
+        if date:
             await interaction.response.send_message(f"🎂 **{user.display_name}** a son anniversaire le **{anniversaires[user.id]}** !")
         else:
             await interaction.response.send_message(f"❌ Aucun anniversaire enregistré pour **{user.display_name}**.", ephemeral=True)
+
 
     @app_commands.command(name="update", description="Met à jour l'anniversaire d'un utilisateur")
     @app_commands.describe(
@@ -142,7 +149,7 @@ class AnnivCommand(app_commands.Group):
     )
     async def update_birthday(self, interaction: discord.Interaction, user: discord.Member, date: str):
         """Met à jour un anniversaire existant"""
-        if user.id not in anniversaires:
+        if get_birthday(user.id) is None:
             await interaction.response.send_message(f"❌ Aucun anniversaire enregistré pour **{user.display_name}**.", ephemeral=True)
             return
 
@@ -153,7 +160,7 @@ class AnnivCommand(app_commands.Group):
                 "❌ Format de date invalide. Utilisation correcte : `JJ-MM` (ex: 10-02)", ephemeral=True)
             return
 
-        anniversaires[user.id] = date
+        update_birthday(user.id, date)
         reminded_users.discard(user.id)  # Reset reminder for updated user
         await interaction.response.send_message(f"✅ Anniversaire de {user.mention} mis à jour pour le **{date}** !")
 
@@ -161,12 +168,13 @@ class AnnivCommand(app_commands.Group):
     @app_commands.describe(user="Mentionnez l'utilisateur dont vous voulez supprimer l'anniversaire")
     async def delete_birthday(self, interaction: discord.Interaction, user: discord.Member):
         """Supprime un anniversaire enregistré"""
-        if user.id in anniversaires:
-            del anniversaires[user.id]
-            reminded_users.discard(user.id)  # Remove user from reminded list
-            await interaction.response.send_message(f"🗑️ Anniversaire de **{user.display_name}** supprimé !")
-        else:
+        if get_birthday(user.id) is None:
             await interaction.response.send_message(f"❌ Aucun anniversaire enregistré pour **{user.display_name}**.", ephemeral=True)
+            return
+        
+        delete_birthday(user.id)
+        reminded_users.discard(user.id)  # Remove user from reminded list
+        await interaction.response.send_message(f"🗑️ Anniversaire de **{user.display_name}** supprimé !")
 
     # @app_commands.command(name="remind", description="Teste le rappel des anniversaires")
     # async def remind(self, interaction: discord.Interaction):
