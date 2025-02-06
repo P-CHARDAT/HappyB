@@ -115,8 +115,11 @@ class AnnivCommand(app_commands.Group):
             await interaction.response.send_message("📅 Aucun anniversaire enregistré.", ephemeral=True)
             return
         
+        # Sort the dictionary by upcoming birthday dates
+        sorted_anniversaires = dict(sorted(anniversaires.items(), key=lambda item: datetime.strptime(item[1], "%d-%m")))
+
         msg = "**📅 Liste des anniversaires :**\n"
-        for user_id, date in anniversaires.items():
+        for user_id, date in sorted_anniversaires.items():
             user = interaction.guild.get_member(user_id)
             username = user.display_name if user else f"Utilisateur inconnu ({user_id})"
             msg += f"🎂 {username} : {date}\n"
