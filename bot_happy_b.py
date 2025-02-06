@@ -143,7 +143,7 @@ class AnnivCommand(app_commands.Group):
         for user_id, date, days_until in sorted_birthdays:
             user = interaction.guild.get_member(user_id)
             username = user.display_name if user else f"Utilisateur inconnu ({user_id})"
-            msg += f"🎂 @{username} : {date} (**dans {days_until} jours**)\n\n"
+            msg += f"🎂 @{username} : {date} (**dans {days_until} jour(s)**)\n\n"
 
         await interaction.response.send_message(msg)
 
