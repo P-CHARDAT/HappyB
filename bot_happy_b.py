@@ -139,11 +139,11 @@ class AnnivCommand(app_commands.Group):
         # Sort by the number of days until the birthday
         sorted_birthdays.sort(key=lambda x: x[2])
 
-        msg = "**📅 Liste des anniversaires (triés par date la plus proche) :**\n"
+        msg = "**📅 Liste des anniversaires (triés par date la plus proche) :**\n\n"
         for user_id, date, days_until in sorted_birthdays:
             user = interaction.guild.get_member(user_id)
             username = user.display_name if user else f"Utilisateur inconnu ({user_id})"
-            msg += f"🎂 {username} : {date} (**dans {days_until} jours**)\n"
+            msg += f"🎂 @{username} : {date} (**dans {days_until} jours**)\n\n"
 
         await interaction.response.send_message(msg)
 
